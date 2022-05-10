@@ -29,15 +29,22 @@
         "imports": {
           "three": "https://unpkg.com/three@0.140.1/build/three.module.js",
           "controls": "https://unpkg.com/three@0.140.1/examples/jsm/controls/OrbitControls.js",
-          "loader": "https://unpkg.com/three@0.140.1/examples/jsm/loaders/GLTFLoader.js"
+          "loader": "https://unpkg.com/three@0.140.1/examples/jsm/loaders/GLTFLoader.js",
+          "stats": "https://unpkg.com/three@0.140.1/examples/jsm/libs/stats.module.js"
         }
       }
     </script>
 
     <script type="module">
       import * as THREE from "three";
+      import Stats from "stats";
       import { OrbitControls } from "controls";
       import { GLTFLoader } from "loader";
+
+      let container, stats;
+
+      container = document.createElement("div");
+      document.body.appendChild(container);
 
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(
@@ -47,26 +54,33 @@
         1000
       );
 
-      const renderer = new THREE.WebGLRenderer({ alpha: true });
+      // renderer
+      const renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+      });
+      renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
+      container.appendChild(renderer.domElement);
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+      // controls
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enabled = true;
 
-      //   const geometry = new THREE.BoxGeometry();
-      //   const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-      //   const cube = new THREE.Mesh(geometry, material);
-      //   scene.add(cube);
-
+      // camera
       camera.position.z = 5;
       camera.position.y = 1;
       camera.position.x = 1;
 
-      //   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-      //   scene.add(ambientLight);
+      // STATS
+
+      stats = new Stats();
+      container.appendChild(stats.dom);
+
+      // lights and shadow
 
       const pointLight = new THREE.PointLight(0xffffff, 1, 100);
       pointLight.position.set(0, 20, 0);
@@ -78,6 +92,13 @@
       pointLight.shadow.camera.near = 0.5; // default
       pointLight.shadow.camera.far = 100; // default
 
+      //   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      //   scene.add(ambientLight);
+
+      //   const helper = new THREE.CameraHelper(pointLight.shadow.camera);
+      //   scene.add(helper);
+
+      // loaders and object/material
       const loader = new GLTFLoader();
       let f1;
 
@@ -99,9 +120,7 @@
       plane.rotation.x = -1.5707963267948966;
       scene.add(plane);
 
-      //   const helper = new THREE.CameraHelper(pointLight.shadow.camera);
-      //   scene.add(helper);
-
+      // animate and render
       function animate() {
         requestAnimationFrame(animate);
         // if (f1) {
@@ -114,6 +133,7 @@
         // cube.rotation.z += 0.01;
 
         renderer.render(scene, camera);
+        stats.update();
       }
       animate();
     </script>
